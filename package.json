@@ -1,0 +1,15 @@
+{
+  "name": "dsh-workbuddy-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "DSH (DeepSeek harness) 与 WorkBuddy 之间的任务网关：派单、交付物回传、返工记账",
+  "engines": {
+    "node": ">=18.20.8"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "smoke": "node smoke.mjs",
+    "doctor": "node src/server.mjs --doctor"
+  }
+}

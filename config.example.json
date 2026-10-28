@@ -1,0 +1,72 @@
+{
+  "host": "127.0.0.1",
+  "port": 8787,
+  "token": "<请替换为随机 token，可用 `node -e \"console.log(require('crypto').randomBytes(24).toString('base64url'))\"` 生成>",
+  "workspaces": [
+    "D:\\<你的工作区根目录，例如 D:\\workbuddy>"
+  ],
+  "scope": {
+    "allowRoots": [
+      "D:\\<只允许这个工作区生效的根目录>"
+    ]
+  },
+  "stateDir": "<网关状态目录绝对路径，例如 D:\\...\\gateway\\.gateway>",
+  "executor": {
+    "cliBin": "<WorkBuddy CLI 绝对路径，指向 resources/app.asar.unpacked/cli/bin/codebuddy>",
+    "permissionMode": "bypassPermissions",
+    "skipPermissions": false,
+    "allowedTools": [
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Bash"
+    ],
+    "maxTurns": 40,
+    "timeoutMs": 900000,
+    "model": "deepseek-chat",
+    "persistSession": false,
+    "extraArgs": [],
+    "apiKey": "<你的 DeepSeek API Key，形如 sk-xxxx>",
+    "baseUrl": "https://api.deepseek.com/v1"
+  },
+  "limits": {
+    "maxAttempts": 3,
+    "maxConcurrent": 2,
+    "maxQueue": 20,
+    "requireAcceptanceCriteria": true,
+    "previewBytes": 8192,
+    "previewChars": 4000,
+    "maxFileReadBytes": 1048576
+  },
+  "artifacts": {
+    "ignore": [
+      ".git",
+      "node_modules",
+      ".gateway",
+      ".workbuddy",
+      ".codebuddy",
+      "dist",
+      "build",
+      "out",
+      ".next",
+      ".nuxt",
+      "__pycache__",
+      ".venv",
+      "venv",
+      ".cache",
+      ".pytest_cache",
+      "target",
+      "coverage"
+    ],
+    "maxFiles": 5000,
+    "maxDepth": 12
+  },
+  "deepseek": {
+    "baseUrl": "https://api.deepseek.com/v1",
+    "apiKey": "",
+    "model": "deepseek-chat",
+    "maxToolRounds": 8
+  }
+}
