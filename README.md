@@ -2,12 +2,58 @@
 
 让 DeepSeek harness（DSH）把活派给 WorkBuddy 干，拿回**结构化交付物**去审核，不合格就带着意见退回返工。
 
-```
-用户 ⇄ DSH ──POST /v1/tasks──▶ Gateway ──spawn──▶ codebuddy -p ──▶ 工作区
-                    ◀──交付物────┘
+## 架构
+
+```mermaid
+flowchart LR
+    U[用户] <-->|对话| DSH[DeepSeek Harness\n编排方 · 审核方]
+    DSH -->|MCP stdio\nmcp__workbuddy__exec| GW[Gateway\n派单 · 记账 · 护栏]
+    GW -->|spawn| CLI[codebuddy -p\n无头执行器]
+    CLI --> WS[(工作区\n文件变更)]
+
+    CLI -.->|交付物| GW
+    GW -.->|结构化交付\nartifacts + diff + verify| DSH
+    DSH -.->|审核不合格\nreview_feedback 返工| GW
+    DSH -.->|合格| U
+
+    classDef box fill:#f6f8fa,stroke:#888,stroke-width:1px;
+    class U,DSH,GW,CLI,WS box;
 ```
 
-DSH 是编排方与审核方，Gateway 只负责三件事：**派单执行、交付物结构化、返工记账**。
+DSH 是编排方与审核方，Gateway 只负责三件事：**派单执行、交付物结构化、返工记账**。返工闭环：DSH 审核交付物，不合格就带 `review_feedback` 原 `session_id` 重派，服务端裁定轮次，3 轮封顶。
+
+## 组件结构
+
+```mermaid
+flowchart TB
+    subgraph DSH[DeepSeek Harness · Electron + Cordis]
+        BILLION[billion-context 运行时]
+        MCPC[dsh-mcp-client 插件]
+    end
+
+    subgraph GW[Gateway · 纯 Node 零依赖]
+        MCP[mcp.mjs\nMCP stdio 服务端]
+        REST[server.mjs\nHTTP REST 面]
+        CORE[src/ runner · executor\nartifacts · ledger · config]
+    end
+
+    subgraph EXT[外部]
+        WB[WorkBuddy CLI\ncodebuddy -p]
+        DS[DeepSeek API\nOpenAI 兼容]
+    end
+
+    BILLION --> MCPC
+    MCPC -->|stdio 拉起| MCP
+    MCP --> CORE
+    REST --> CORE
+    CORE -->|spawn| WB
+    REST -->|tool 循环| DS
+
+    classDef box fill:#f6f8fa,stroke:#888,stroke-width:1px;
+    class MCP,REST,CORE,WB,DS,MCPC,BILLION box;
+```
+
+两条接入面（MCP 与 REST/OpenAI 兼容面）**共用同一套核心**（`runner.mjs` / `ledger.mjs` / `artifacts.mjs`），护栏完全一致。任选其一，不要同时开（账本进程内存态会各持一份缓存）。
 
 ## 前置条件：一个 API Key（不需要登录）
 
